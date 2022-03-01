@@ -1,0 +1,16 @@
+{
+  "name": "aquafi-uniswap-v2-stats",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ shahzaibhabib/aquafi-uniswap-v2-stats",
+    "create-local": "graph create --node http://localhost:8020/ shahzaibhabib/aquafi-uniswap-v2-stats",
+    "remove-local": "graph remove --node http://localhost:8020/ shahzaibhabib/aquafi-uniswap-v2-stats",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 shahzaibhabib/aquafi-uniswap-v2-stats"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.26.0",
+    "@graphprotocol/graph-ts": "0.24.1"
+  }
+}

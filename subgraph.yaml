@@ -1,0 +1,56 @@
+specVersion: 0.0.1
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: AquaFiPrimary
+    network: rinkeby
+    source:
+      address: "0x8c2bA13C2fBe82286c50c5A60E36ce5dB8b76b10"
+      abi: AquaFiPrimary
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - AccessControlRevoked
+        - ControllerContractUpdated
+        - FeeReceiverUpdated
+        - FeeUpdated
+        - HandlerUpdated
+        - OracleAddressUpdated
+        - PremiumContractUpdated
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - Staked
+        - Unstaked
+      abis:
+        - name: AquaFiPrimary
+          file: ./abis/AquaFiPrimary.json
+      eventHandlers:
+        - event: AccessControlRevoked(uint8)
+          handler: handleAccessControlRevoked
+        - event: ControllerContractUpdated(address,address)
+          handler: handleControllerContractUpdated
+        - event: FeeReceiverUpdated(address,address)
+          handler: handleFeeReceiverUpdated
+        - event: FeeUpdated(uint256,uint256)
+          handler: handleFeeUpdated
+        - event: HandlerUpdated(address,address,bool)
+          handler: handleHandlerUpdated
+        - event: OracleAddressUpdated(address,address)
+          handler: handleOracleAddressUpdated
+        - event: PremiumContractUpdated(address,address)
+          handler: handlePremiumContractUpdated
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: Staked(bytes32,uint256,uint256,address,address,address,bytes)
+          handler: handleStaked
+        - event: Unstaked(bytes32,uint256,uint256,uint256,address[],uint128[],uint256)
+          handler: handleUnstaked
+      file: ./src/mapping.ts
