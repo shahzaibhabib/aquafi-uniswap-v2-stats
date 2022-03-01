@@ -1,5 +1,286 @@
-type ExampleEntity @entity {
+# stores for USD calculations
+type Bundle @entity {
   id: ID!
-  count: BigInt!
-  methodId: Int! # uint8
+  # price of ETH in usd
+  ethPriceUSD: BigDecimal!
+}
+
+type Token @entity {
+  # token address
+  id: ID!
+  # token symbol
+  symbol: String!
+  # token name
+  name: String!
+  # token decimals
+  decimals: BigInt!
+  # amount of eth drived from unit amount of token
+  drivedETH: BigDecimal!
+  # amount of USD drived from "drivedETH"
+  drivedUSD: BigDecimal!
+}
+
+type Pool @entity {
+  # pool address
+  id: ID!
+  # pool premium percentage
+  aquaPremium: BigInt!
+  # previous pool premium percentage
+  previousAquaPremium: BigInt!
+  # boolean representing pool is currently whitelisted by the potocol or not
+  status: Boolean!
+  # boolean representing pool is previously whitelisted or not
+  previousStatus: Boolean!
+  # token0 of the pool
+  token0: Token!
+  # token1 of the pool
+  token1: Token!
+  # fee amount (This is just for the sake of same schema across all stats handlers)
+  feeTier: BigInt!
+  # reserve0
+  reserve0: BigDecimal!
+  # reserve1
+  reserve1: BigDecimal!
+
+  # staked token0
+  reserve0Staked: BigDecimal!
+  # staked token1
+  reserve1Staked: BigDecimal!
+
+  # total amount of aqua rewarded in the form of premium of this specific pool
+  aquaPremiumAmount: BigDecimal!
+  # amount of USD drived from "aquaPremiumAmount"
+  aquaPremiumAmountDrivedUSD: BigDecimal!
+
+  # total amount of aqua rewarded of this specific pool
+  aquaAmount: BigDecimal!
+  # amount of USD drived from "aquaAmount"
+  aquaAmountDrivedUSD: BigDecimal!
+
+  # total value of lp tokens locked or staked of this specific pool
+  totalValueLockedDrivedUSD: BigDecimal!
+
+  # all stakes of the pool
+  stakes: [Stake!]
+  # all unstakes of the pool
+  unstakes: [Unstake!]
+
+  # all time stakes of this pool
+  stakeCount: BigInt!
+  # number of currently active stakes of this specific pool
+  activeStakeCount: BigInt!
+  # unstakes of this specfic pool
+  unstakeCount: BigInt!
+}
+
+type User @entity {
+  # user address
+  id: ID!
+  # user stakes
+  stakes: [Stake!]
+  # user unstakes
+  unstakes: [Unstake!]
+}
+
+type Stake @entity {
+  # stake id
+  id: ID!
+  # transaction hash
+  transactionHash: String!
+  # lp token address
+  token: String!
+  # amount of lpToken
+  tokenAmount: BigDecimal!
+  # pool of the lp tokens
+  pool: String!
+  # pool premium
+  aquaPremium: BigInt!
+  # token0 of the pool
+  token0: Token!
+  # token1 of the pool
+  token1: Token!
+  # token0 reserves againt lp token
+  reserve0: BigDecimal!
+  # token1 reserves againt lp token
+  reserve1: BigDecimal!
+  # amount of eth drived from reserve0
+  reserve0DrivedETH: BigDecimal!
+  # amount of eth drived from reserve1
+  reserve1DrivedETH: BigDecimal!
+  # amount of USD drived from "reserve0DrivedETH"
+  reserve0DrivedUSD: BigDecimal!
+  # amount of USD drived from "reserve1DrivedETH"
+  reserve1DrivedUSD: BigDecimal!
+  # sum of "reserve0DrivedUSD" & "reserve1DrivedUSD"
+  totalReservesDrivedUSD: BigDecimal!
+  # staker / owner
+  staker: String!
+  # time when user staked
+  stakeTime: BigInt!
+  # aquafi handler address
+  handler: String!
+  # active stake, false if unstaked
+  active: Boolean!
+}
+
+type Unstake @entity {
+  # unstake id
+  id: ID!
+  # transaction hash
+  transactionHash: String!
+  # token address
+  token: String!
+  # amount of lpToken
+  tokenAmount: BigDecimal!
+  # pool of the lp tokens
+  pool: String!
+  # pool premium
+  aquaPremium: BigInt!
+  # rewarded aqua premium amount
+  aquaPremiumAmount: BigDecimal!
+  # amount of USD drived from "aquaPremiumAmount"
+  aquaPremiumAmountDrivedUSD: BigDecimal!
+  # total aqua amount rewarded
+  aquaAmount: BigDecimal!
+  # amount of USD drived from "aquaAmount"
+  aquaAmountDrivedUSD: BigDecimal!
+  # unstaker
+  staker: String!
+  # unstake time
+  unstakeTime: BigInt!
+  # aqua handler address
+  handler: String!
+  # token0 of the pool
+  token0: Token!
+  # token1 of the pool
+  token1: Token!
+  # initial reserve0 againt unstaked lp token (does not include fee generated)
+  reserve0: BigDecimal!
+  # initial reserve1 againt unstaked lp token (does not include fee generated)
+  reserve1: BigDecimal!
+  # amount of eth drived from reserve0
+  reserve0DrivedETH: BigDecimal!
+  # amount of eth drived from reserve1
+  reserve1DrivedETH: BigDecimal!
+  # amount of USD drived from "reserve0DrivedETH"
+  reserve0DrivedUSD: BigDecimal!
+  # amount of USD drived from "reserve1DrivedETH"
+  reserve1DrivedUSD: BigDecimal!
+  # sum of "reserve0DrivedUSD" & "reserve1DrivedUSD"
+  totalReservesDrivedUSD: BigDecimal!
+  # lp fee generated against lp token, drived ETH
+  lpFeeGeneratedDrivedETH: BigDecimal!
+  # lp fee generated against lp token, drived USD
+  lpFeeGeneratedDrivedUSD: BigDecimal!
+}
+
+# all the stake & unstake transactions of the specific pool
+type Transaction @entity {
+  # txn hash
+  id: ID!
+  # block txn was included in
+  blockNumber: BigInt!
+  # timestamp txn was confirmed
+  timestamp: BigInt!
+  # gas used during txn execution
+  # gasUsed: BigInt!
+  # gas price of the txn
+  gasPrice: BigInt!
+  # all stakes of the pool
+  stakes: [Stake!]
+  # all unstakes of the pool
+  unstakes: [Unstake!]
+}
+
+type AquaFiDayData @entity {
+  # timestamp rounded to current day by dividing by 86400
+  id: ID!
+  # day start timestamp
+  date: Int!
+
+  # all time total value locked drived USD
+  totalValueLockedDrivedUSD: BigDecimal!
+  # ACTIVE total value locked in terms of ETH
+  activeTotalValueLockedDrivedETH: BigDecimal
+  # amount of USD drived from "totalValueLockedETH"
+  activeTotalValueLockedDrivedUSD: BigDecimal!
+
+  # total aqua premium amount rewarded from AquaFi
+  aquaPremiumAmount: BigDecimal!
+  # amount of ETH drived from "aquaPremiumAmount"
+  aquaPremiumAmountDrivedETH: BigDecimal
+  # amount of USD drived from "aquaPremiumAmountDrivedETH"
+  aquaPremiumAmountDrivedUSD: BigDecimal!
+
+  # total aqua amount rewarded from AquaFi
+  aquaAmount: BigDecimal!
+  # amount of ETH drived from "aquaAmount"
+  aquaAmountDrivedETH: BigDecimal
+  # amount of USD drived from "aquaAmountDrivedETH"
+  aquaAmountDrivedUSD: BigDecimal!
+
+  # total stake tx in AquaFi Uniswap V2
+  stakeCount: BigInt!
+  # total unstake tx in AquaFi Uniswap V2
+  unstakeCount: BigInt!
+}
+
+type PoolDayData @entity {
+  # pool id concat with timestamp rounded to current day by dividing by 86400
+  id: ID!
+  # day start timestamp
+  date: Int!
+
+  # pool Address
+  pool: String!
+  # pool premium percentage
+  aquaPremium: BigInt!
+
+  # total amount of aqua rewarded in the form of premium
+  aquaPremiumAmount: BigDecimal!
+  # aqua premium rewarded in terms of USD
+  aquaPremiumAmountDrivedUSD: BigDecimal!
+
+  # total aqua amount rewarded
+  aquaAmount: BigDecimal!
+  # total aqua amount rewarded drived USD
+  aquaAmountDrivedUSD: BigDecimal!
+
+  # total value of lp tokens locked or staked
+  totalValueLockedDrivedUSD: BigDecimal!
+
+  # total stake count
+  stakeCount: BigInt!
+  # total unstake count
+  unstakeCount: BigInt!
+  # active stake count
+  activeStakeCount: BigInt!
+}
+
+# stores global aqua uniswap v2 information
+type AquaFi @entity {
+  # aquafi handler address
+  id: ID!
+
+  # all time total value locked drived USD
+  totalValueLockedDrivedUSD: BigDecimal!
+  # ACTIVE stakes total value locked drived USD
+  activeTotalValueLockedDrivedUSD: BigDecimal!
+
+  # total amount of aqua premium rewarded
+  aquaPremiumAmount: BigDecimal!
+  # total amount of aqua premium rewarded drived USD
+  aquaPremiumAmountDrivedUSD: BigDecimal!
+
+  # total amount of aqua rewarded
+  aquaAmount: BigDecimal!
+  # total amount of aqua rewarded drived USD
+  aquaAmountDrivedUSD: BigDecimal!
+
+  # all time number of stakes
+  stakeCount: BigInt!
+  # all time number of unstakes
+  unstakeCount: BigInt!
+  # number of currently active stakes
+  activeStakeCount: BigInt!
 }
