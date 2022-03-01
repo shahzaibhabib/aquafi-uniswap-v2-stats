@@ -1,56 +1,93 @@
-specVersion: 0.0.1
+specVersion: 0.0.2
 schema:
   file: ./schema.graphql
 dataSources:
-  - kind: ethereum
+  - kind: ethereum/contract
     name: AquaFiPrimary
     network: rinkeby
     source:
       address: "0x8c2bA13C2fBe82286c50c5A60E36ce5dB8b76b10"
       abi: AquaFiPrimary
+      startBlock: 9245504
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
-        - AccessControlRevoked
-        - ControllerContractUpdated
-        - FeeReceiverUpdated
-        - FeeUpdated
-        - HandlerUpdated
-        - OracleAddressUpdated
-        - PremiumContractUpdated
-        - RoleAdminChanged
-        - RoleGranted
-        - RoleRevoked
         - Staked
         - Unstaked
       abis:
         - name: AquaFiPrimary
           file: ./abis/AquaFiPrimary.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
       eventHandlers:
-        - event: AccessControlRevoked(uint8)
-          handler: handleAccessControlRevoked
-        - event: ControllerContractUpdated(address,address)
-          handler: handleControllerContractUpdated
-        - event: FeeReceiverUpdated(address,address)
-          handler: handleFeeReceiverUpdated
-        - event: FeeUpdated(uint256,uint256)
-          handler: handleFeeUpdated
-        - event: HandlerUpdated(address,address,bool)
-          handler: handleHandlerUpdated
-        - event: OracleAddressUpdated(address,address)
-          handler: handleOracleAddressUpdated
-        - event: PremiumContractUpdated(address,address)
-          handler: handlePremiumContractUpdated
-        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
-          handler: handleRoleAdminChanged
-        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleGranted
-        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
-          handler: handleRoleRevoked
         - event: Staked(bytes32,uint256,uint256,address,address,address,bytes)
           handler: handleStaked
         - event: Unstaked(bytes32,uint256,uint256,uint256,address[],uint128[],uint256)
           handler: handleUnstaked
-      file: ./src/mapping.ts
+      file: ./src/mappings/primary.ts
+  - kind: ethereum/contract
+    name: AquaFiUniswapV2Handler
+    network: rinkeby
+    source:
+      address: "0x1860A25Ebc61580eFE5e0379c719b654503611be"
+      abi: AquaFiUniswapV2Handler
+      startBlock: 9245505
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - PoolAdded
+        - PoolPremiumUpdated
+        - PoolStatusUpdated
+      abis:
+        - name: AquaFiUniswapV2Handler
+          file: ./abis/AquaFiUniswapV2Handler.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: UniswapV2Factory
+          file: ./abis/UniswapV2Factory.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+      eventHandlers:
+        - event: PoolAdded(address,uint256,bool)
+          handler: handlePoolAdded
+        - event: PoolPremiumUpdated(address,uint256,uint256)
+          handler: handlePoolPremiumUpdated
+        - event: PoolStatusUpdated(address,bool,bool)
+          handler: handlePoolStatusUpdated
+      file: ./src/mappings/handler.ts
+templates:
+  - kind: ethereum/contract
+    name: UniswapV2Pair
+    network: rinkeby
+    source:
+      abi: UniswapV2Pair
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - Pair
+        - Token
+      abis:
+        - name: UniswapV2Factory
+          file: ./abis/UniswapV2Factory.json
+        - name: UniswapV2Pair
+          file: ./abis/UniswapV2Pair.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+      eventHandlers:
+        - event: Sync(uint112,uint112)
+          handler: handleSync
+      file: ./src/mappings/pool.ts
